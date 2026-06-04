@@ -168,9 +168,20 @@ function setupCategories() {
 }
 
 function setupSearch() {
-    searchInput.addEventListener('input', (e) => {
+    // Search
+    searchInput.addEventListener('input', () => {
         filterAndRender();
     });
+
+    // Blur search box when interacting with video player to dismiss mobile keyboard
+    const blurSearch = () => {
+        if (document.activeElement === searchInput) {
+            searchInput.blur();
+        }
+    };
+    videoPlayer.addEventListener('touchstart', blurSearch);
+    videoPlayer.addEventListener('click', blurSearch);
+    videoPlayer.addEventListener('play', blurSearch);
 }
 
 function filterAndRender() {
@@ -215,7 +226,8 @@ function renderChannels(channels) {
         const channel = channels[i];
         
         const card = document.createElement('div');
-        card.className = 'channel-card';
+        card.className = `channel-card ${channel.id === currentPlayingChannelId ? 'active' : ''}`;
+        card.dataset.id = channel.id;
         card.onclick = () => playChannel(channel, card);
         
         const fallbackLogo = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMWExYWEiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSIyIiB5PSI3IiB3aWR0aD0iMjAiIGhlaWdodD0iMTUiIHJ4PSIyIiByeT0iMiI+PC9yZWN0Pjxwb2x5bGluZSBwb2ludHM9IjE3IDIgMTIgNyA3IDIiPjwvcG9seWxpbmU+PC9zdmc+";
@@ -256,7 +268,19 @@ function toggleFavorite(id) {
     }
     localStorage.setItem('xdtv_favorites', JSON.stringify(favorites));
     updateMainStarBtn();
-    filterAndRender();
+    
+    if (activeGroup === 'Favorites') {
+        filterAndRender();
+    } else {
+        // Update DOM without full re-render to preserve scroll position
+        document.querySelectorAll(`.channel-card[data-id="${id}"] .star-btn`).forEach(btn => {
+            if (favorites.includes(id)) {
+                btn.classList.add('starred');
+            } else {
+                btn.classList.remove('starred');
+            }
+        });
+    }
 }
 
 function updateMainStarBtn() {

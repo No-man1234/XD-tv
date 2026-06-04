@@ -508,8 +508,13 @@ body {
     .sidebar {
         width: 100%;
         flex: 1;
+        min-height: 0;
         height: auto;
         border-right: none;
         border-top: 1px solid var(--border-subtle);
+    }
+    
+    .channels-list {
+        -webkit-overflow-scrolling: touch;
     }
 }

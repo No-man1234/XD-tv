@@ -48,6 +48,12 @@ async function init() {
         setupCategories();
         renderChannels(allChannels);
         setupSearch();
+        
+        // Autoplay T Sports HD on load
+        const defaultChannel = allChannels.find(c => c.name.toLowerCase() === 't sports hd' || c.name.toLowerCase().includes('t sports'));
+        if (defaultChannel) {
+            playChannel(defaultChannel);
+        }
     } catch (error) {
         console.error('Initialization error:', error);
         channelsListEl.innerHTML = `

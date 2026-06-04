@@ -127,7 +127,7 @@ async function init() {
             defaultChannel = allChannels.find(c => c.name.toLowerCase().includes('t sports') || c.name.toLowerCase().includes('tsports'));
         }
         if (defaultChannel) {
-            playChannel(defaultChannel);
+            playChannel(defaultChannel, null, false);
         }
     } catch (error) {
         console.error('Initialization error:', error);
@@ -274,7 +274,7 @@ mainStarBtn.onclick = () => {
     }
 };
 
-function playChannel(channel, cardElement) {
+function playChannel(channel, cardElement, autoPlay = true) {
     currentPlayingChannelId = channel.id;
     updateMainStarBtn();
     
@@ -283,11 +283,11 @@ function playChannel(channel, cardElement) {
     if (cardElement) {
         cardElement.classList.add('active');
     }
-
+    
     // Hide overlays
     playerOverlay.classList.add('hidden');
     errorOverlay.classList.add('hidden');
-    
+
     // Update Info
     channelInfo.classList.remove('hidden');
     currentChannelName.textContent = channel.name;
@@ -306,7 +306,7 @@ function playChannel(channel, cardElement) {
             btn.onclick = () => {
                 document.querySelectorAll('.stream-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                playStream(url);
+                playStream(url, autoPlay);
             };
             streamSelector.appendChild(btn);
         });
@@ -314,10 +314,10 @@ function playChannel(channel, cardElement) {
         streamSelector.classList.add('hidden');
     }
 
-    playStream(channel.urls[0]);
+    playStream(channel.urls[0], autoPlay);
 }
 
-function playStream(url) {
+function playStream(url, autoPlay = true) {
     if (Hls.isSupported()) {
         if (currentHls) {
             currentHls.destroy();
@@ -332,11 +332,13 @@ function playStream(url) {
         currentHls.attachMedia(videoPlayer);
         
         currentHls.on(Hls.Events.MANIFEST_PARSED, function () {
-            videoPlayer.play().catch(e => {
-                console.warn('Autoplay with sound prevented by browser. Falling back to muted autoplay.', e);
-                videoPlayer.muted = true;
-                videoPlayer.play().catch(err => console.error('Autoplay totally prevented:', err));
-            });
+            if (autoPlay) {
+                videoPlayer.play().catch(e => {
+                    console.warn('Autoplay with sound prevented by browser. Falling back to muted autoplay.', e);
+                    videoPlayer.muted = true;
+                    videoPlayer.play().catch(err => console.error('Autoplay totally prevented:', err));
+                });
+            }
         });
 
         currentHls.on(Hls.Events.ERROR, function (event, data) {
@@ -361,11 +363,13 @@ function playStream(url) {
         // Safari native support
         videoPlayer.src = url;
         videoPlayer.addEventListener('loadedmetadata', function () {
-            videoPlayer.play().catch(e => {
-                console.warn('Autoplay with sound prevented by browser. Falling back to muted autoplay.', e);
-                videoPlayer.muted = true;
-                videoPlayer.play().catch(err => console.error('Autoplay totally prevented:', err));
-            });
+            if (autoPlay) {
+                videoPlayer.play().catch(e => {
+                    console.warn('Autoplay with sound prevented by browser. Falling back to muted autoplay.', e);
+                    videoPlayer.muted = true;
+                    videoPlayer.play().catch(err => console.error('Autoplay totally prevented:', err));
+                });
+            }
         });
         videoPlayer.addEventListener('error', showError);
     } else {

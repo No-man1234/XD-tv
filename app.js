@@ -89,6 +89,19 @@ async function init() {
         
         allChannels = Object.values(grouped);
         
+        allChannels.sort((a, b) => {
+            const aGroup = (a.group || '').toLowerCase();
+            const bGroup = (b.group || '').toLowerCase();
+            
+            const isAPriority = aGroup.includes('bangla') || aGroup.includes('sports');
+            const isBPriority = bGroup.includes('bangla') || bGroup.includes('sports');
+            
+            if (isAPriority && !isBPriority) return -1;
+            if (!isAPriority && isBPriority) return 1;
+            
+            return a.name.localeCompare(b.name);
+        });
+        
         setupCategories();
         renderChannels(allChannels);
         setupSearch();

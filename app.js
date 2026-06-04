@@ -122,7 +122,10 @@ async function init() {
         setupSearch();
         
         // Autoplay T Sports HD on load
-        const defaultChannel = allChannels.find(c => c.name.toLowerCase() === 't sports hd' || c.name.toLowerCase().includes('t sports'));
+        let defaultChannel = allChannels.find(c => c.name.toLowerCase() === 't sports hd' || c.name.toLowerCase() === 'tsports hd');
+        if (!defaultChannel) {
+            defaultChannel = allChannels.find(c => c.name.toLowerCase().includes('t sports') || c.name.toLowerCase().includes('tsports'));
+        }
         if (defaultChannel) {
             playChannel(defaultChannel);
         }

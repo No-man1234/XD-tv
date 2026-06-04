@@ -12,12 +12,16 @@ XD-TV is designed to be lightweight and fast, providing an elegant, distraction-
 - 📱 **Fully Responsive**: Carefully crafted layouts that look and feel native on both Desktop and Mobile devices.
 - ⚡ **HLS Integration**: Natively plays `.m3u8` live streams using [hls.js](https://github.com/video-dev/hls.js) with robust error handling and stream fallbacks.
 - ⭐️ **Favorites System**: Star your favorite channels to save them to your browser's local storage for instant access via a dedicated "Favorites" tab.
-- 🔄 **Auto-Grouping & Multiple Streams**: Automatically detects duplicate channel names in the data source and merges them, providing a smart "Server Selector" button to switch backup streams if one goes offline.
-- 🔊 **Smart Autoplay**: Automatically plays a default channel (e.g., *T Sports HD*) on load, intelligently falling back to muted playback if blocked by strict browser autoplay policies.
+- 🌍 **Massive Global Library**: Access to tens of thousands of live channels worldwide, intelligently optimized to prevent browser lag.
+- 🔄 **Auto-Grouping & Multiple Streams**: Automatically detects duplicate channel names across datasets and merges them, providing a smart "Server Selector" button to switch backup streams if one goes offline.
+- 🔊 **Smart Autoplay**: Automatically plays *T Sports HD* on load, intelligently falling back to muted playback if blocked by strict browser autoplay policies.
+- 🎯 **Smart Sorting**: Bangladeshi, Bangla, and Sports channels are prioritized at the top of the list for quick access.
 
-## 📡 Data Source
+## 📡 Data Sources
 
-The channels displayed in this player are fetched live in JSON format from the [SHAJON-404/iptv](https://github.com/SHAJON-404/iptv) repository.
+This application uniquely combines and normalizes live data from two massive repositories:
+1. **[iptv-org/iptv](https://github.com/iptv-org/iptv)**: A colossal global database providing over 30,000 live streams.
+2. **[SHAJON-404/iptv](https://github.com/SHAJON-404/iptv)**: A curated list of regional channels.
 
 ## 🚀 Deployment
 

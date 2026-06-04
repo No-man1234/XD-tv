@@ -6,6 +6,7 @@ let allChannels = [];
 let currentHls = null;
 let activeGroup = 'All';
 let favorites = JSON.parse(localStorage.getItem('xdtv_favorites') || '[]');
+let customChannels = JSON.parse(localStorage.getItem('xdtv_custom_channels') || '[]');
 
 // DOM Elements
 const channelsListEl = document.getElementById('channelsList');
@@ -89,7 +90,7 @@ async function init() {
             }
         });
         
-        allChannels = Object.values(grouped);
+        allChannels = [...customChannels, ...Object.values(grouped)];
         
         allChannels.sort((a, b) => {
             const aGroup = (a.group || '').toLowerCase();
@@ -189,14 +190,23 @@ function setupSearch() {
         customStreamBtn.onclick = () => {
             const url = prompt("Enter a custom .m3u8 live stream link:");
             if (url && url.trim() !== '') {
+                const name = prompt("Enter a name for this channel:", "Custom Stream") || "Custom Stream";
                 const customChannel = {
                     id: 'custom-' + Date.now(),
-                    name: 'Custom Stream',
+                    name: name,
                     group: 'Custom',
                     logo: '',
                     urls: [url.trim()]
                 };
+                
+                // Save persistently
+                customChannels.unshift(customChannel);
+                localStorage.setItem('xdtv_custom_channels', JSON.stringify(customChannels));
+                
+                // Add to current session and play
+                allChannels.unshift(customChannel);
                 playChannel(customChannel, null, true);
+                filterAndRender();
             }
         };
     }

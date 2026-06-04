@@ -13,11 +13,13 @@ const categoryFiltersEl = document.getElementById('categoryFilters');
 const searchInput = document.getElementById('searchInput');
 const videoPlayer = document.getElementById('videoPlayer');
 const playerOverlay = document.getElementById('playerOverlay');
-const errorOverlay = document.getElementById('errorOverlay');
 const channelInfo = document.getElementById('channelInfo');
 const currentChannelLogo = document.getElementById('currentChannelLogo');
 const currentChannelName = document.getElementById('currentChannelName');
 const currentChannelGroup = document.getElementById('currentChannelGroup');
+const mainStarBtn = document.getElementById('mainStarBtn');
+
+let currentPlayingChannelId = null;
 
 async function fetchIptvOrgData() {
     try {
@@ -93,11 +95,24 @@ async function init() {
             const aGroup = (a.group || '').toLowerCase();
             const bGroup = (b.group || '').toLowerCase();
             
-            const isAPriority = aGroup.includes('bangla') || aGroup.includes('sports');
-            const isBPriority = bGroup.includes('bangla') || bGroup.includes('sports');
+            const aIsBD = aGroup.includes('bangla') || aGroup.includes('bangladeshi');
+            const bIsBD = bGroup.includes('bangla') || bGroup.includes('bangladeshi');
             
-            if (isAPriority && !isBPriority) return -1;
-            if (!isAPriority && isBPriority) return 1;
+            const aIsSports = aGroup.includes('sports');
+            const bIsSports = bGroup.includes('sports');
+            
+            const getRank = (isBD, isSports) => {
+                if (isBD) return 1;
+                if (isSports) return 2;
+                return 3;
+            };
+            
+            const aRank = getRank(aIsBD, aIsSports);
+            const bRank = getRank(bIsBD, bIsSports);
+            
+            if (aRank !== bRank) {
+                return aRank - bRank;
+            }
             
             return a.name.localeCompare(b.name);
         });
@@ -237,10 +252,29 @@ function toggleFavorite(id) {
         favorites.push(id);
     }
     localStorage.setItem('xdtv_favorites', JSON.stringify(favorites));
+    updateMainStarBtn();
     filterAndRender();
 }
 
+function updateMainStarBtn() {
+    if (!currentPlayingChannelId) return;
+    if (favorites.includes(currentPlayingChannelId)) {
+        mainStarBtn.classList.add('starred');
+    } else {
+        mainStarBtn.classList.remove('starred');
+    }
+}
+
+mainStarBtn.onclick = () => {
+    if (currentPlayingChannelId) {
+        toggleFavorite(currentPlayingChannelId);
+    }
+};
+
 function playChannel(channel, cardElement) {
+    currentPlayingChannelId = channel.id;
+    updateMainStarBtn();
+    
     // Update active UI
     document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('active'));
     if (cardElement) {

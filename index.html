@@ -46,7 +46,7 @@
 
         <main class="player-container">
             <div class="player-wrapper">
-                <video id="videoPlayer" controls autoplay muted playsinline></video>
+                <video id="videoPlayer" controls autoplay playsinline></video>
                 <div class="player-overlay" id="playerOverlay">
                     <div class="overlay-content">
                         <i data-lucide="play-circle" class="overlay-icon"></i>
@@ -72,6 +72,9 @@
                 <div class="stream-selector hidden" id="streamSelector">
                     <!-- Stream buttons injected here -->
                 </div>
+                <button id="mainStarBtn" class="star-btn" style="margin-left: 12px; width: 44px; height: 44px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
+                    <i data-lucide="star" style="width: 20px; height: 20px;"></i>
+                </button>
             </div>
         </main>
         </div>

@@ -182,6 +182,24 @@ function setupSearch() {
     videoPlayer.addEventListener('touchstart', blurSearch);
     videoPlayer.addEventListener('click', blurSearch);
     videoPlayer.addEventListener('play', blurSearch);
+
+    // Custom Stream Button
+    const customStreamBtn = document.getElementById('customStreamBtn');
+    if (customStreamBtn) {
+        customStreamBtn.onclick = () => {
+            const url = prompt("Enter a custom .m3u8 live stream link:");
+            if (url && url.trim() !== '') {
+                const customChannel = {
+                    id: 'custom-' + Date.now(),
+                    name: 'Custom Stream',
+                    group: 'Custom',
+                    logo: '',
+                    urls: [url.trim()]
+                };
+                playChannel(customChannel, null, true);
+            }
+        };
+    }
 }
 
 function filterAndRender() {

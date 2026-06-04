@@ -25,8 +25,25 @@ async function init() {
         
         const data = await response.json();
         
-        // Filter out channels without URLs just in case
-        allChannels = data.filter(c => c.url);
+        const grouped = {};
+        data.forEach(c => {
+            if (!c.url) return;
+            const key = c.name.trim().toLowerCase();
+            if (!grouped[key]) {
+                grouped[key] = {
+                    id: key,
+                    name: c.name.trim(),
+                    logo: c.logo,
+                    group: c.group,
+                    urls: []
+                };
+            }
+            if (!grouped[key].urls.includes(c.url)) {
+                grouped[key].urls.push(c.url);
+            }
+        });
+        
+        allChannels = Object.values(grouped);
         
         setupCategories();
         renderChannels(allChannels);
@@ -81,7 +98,7 @@ function filterAndRender() {
     let filtered = allChannels;
     
     if (activeGroup === 'Favorites') {
-        filtered = filtered.filter(c => favorites.includes(c.url));
+        filtered = filtered.filter(c => favorites.includes(c.id));
     } else if (activeGroup !== 'All') {
         filtered = filtered.filter(c => (c.group || 'Uncategorized') === activeGroup);
     }
@@ -122,7 +139,7 @@ function renderChannels(channels) {
         
         const fallbackLogo = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMWExYWEiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSIyIiB5PSI3IiB3aWR0aD0iMjAiIGhlaWdodD0iMTUiIHJ4PSIyIiByeT0iMiI+PC9yZWN0Pjxwb2x5bGluZSBwb2ludHM9IjE3IDIgMTIgNyA3IDIiPjwvcG9seWxpbmU+PC9zdmc+";
         
-        const isStarred = favorites.includes(channel.url);
+        const isStarred = favorites.includes(channel.id);
         card.innerHTML = `
             <div class="channel-logo-container">
                 <img class="channel-logo" src="${channel.logo || fallbackLogo}" alt="${channel.name}" onerror="this.src='${fallbackLogo}'" loading="lazy">
@@ -139,7 +156,7 @@ function renderChannels(channels) {
         const starBtn = card.querySelector('.star-btn');
         starBtn.onclick = (e) => {
             e.stopPropagation();
-            toggleFavorite(channel.url);
+            toggleFavorite(channel.id);
         };
         
         fragment.appendChild(card);
@@ -150,11 +167,11 @@ function renderChannels(channels) {
     lucide.createIcons();
 }
 
-function toggleFavorite(url) {
-    if (favorites.includes(url)) {
-        favorites = favorites.filter(u => u !== url);
+function toggleFavorite(id) {
+    if (favorites.includes(id)) {
+        favorites = favorites.filter(i => i !== id);
     } else {
-        favorites.push(url);
+        favorites.push(id);
     }
     localStorage.setItem('xdtv_favorites', JSON.stringify(favorites));
     filterAndRender();
@@ -177,7 +194,30 @@ function playChannel(channel, cardElement) {
     currentChannelGroup.textContent = channel.group || 'Uncategorized';
     currentChannelLogo.src = channel.logo || "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMWExYWEiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSIyIiB5PSI3IiB3aWR0aD0iMjAiIGhlaWdodD0iMTUiIHJ4PSIyIiByeT0iMiI+PC9yZWN0Pjxwb2x5bGluZSBwb2ludHM9IjE3IDIgMTIgNyA3IDIiPjwvcG9seWxpbmU+PC9zdmc+";
 
-    // Play Stream
+    const streamSelector = document.getElementById('streamSelector');
+    streamSelector.innerHTML = '';
+    
+    if (channel.urls.length > 1) {
+        streamSelector.classList.remove('hidden');
+        channel.urls.forEach((url, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'stream-btn' + (index === 0 ? ' active' : '');
+            btn.textContent = 'Server ' + (index + 1);
+            btn.onclick = () => {
+                document.querySelectorAll('.stream-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                playStream(url);
+            };
+            streamSelector.appendChild(btn);
+        });
+    } else {
+        streamSelector.classList.add('hidden');
+    }
+
+    playStream(channel.urls[0]);
+}
+
+function playStream(url) {
     if (Hls.isSupported()) {
         if (currentHls) {
             currentHls.destroy();
@@ -188,7 +228,7 @@ function playChannel(channel, cardElement) {
             enableWorker: true,
         });
         
-        currentHls.loadSource(channel.url);
+        currentHls.loadSource(url);
         currentHls.attachMedia(videoPlayer);
         
         currentHls.on(Hls.Events.MANIFEST_PARSED, function () {
@@ -215,7 +255,7 @@ function playChannel(channel, cardElement) {
         });
     } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
         // Safari native support
-        videoPlayer.src = channel.url;
+        videoPlayer.src = url;
         videoPlayer.addEventListener('loadedmetadata', function () {
             videoPlayer.play().catch(e => console.warn('Autoplay prevented', e));
         });

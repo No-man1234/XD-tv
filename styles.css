@@ -397,6 +397,7 @@ body {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
     animation: slideUp 0.3s ease-out forwards;
+    flex-wrap: wrap;
 }
 
 @keyframes slideUp {
@@ -434,6 +435,37 @@ body {
     font-size: 0.75rem;
     color: var(--text-secondary);
     width: fit-content;
+}
+
+/* Stream Selector */
+.stream-selector {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+    flex-wrap: wrap;
+}
+
+.stream-btn {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.stream-btn:hover {
+    background-color: var(--bg-elevated);
+    color: var(--text-primary);
+}
+
+.stream-btn.active {
+    background-color: var(--accent);
+    color: var(--accent-fg);
+    border-color: var(--accent);
 }
 
 /* Utilities */

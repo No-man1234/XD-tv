@@ -143,29 +143,45 @@ async function init() {
     }
 }
 
+function getCategoryIcon(group) {
+    const g = group.toLowerCase();
+    if (g === 'all') return 'globe';
+    if (g === 'favorites') return 'star';
+    if (g.includes('sport')) return 'trophy';
+    if (g.includes('news')) return 'newspaper';
+    if (g.includes('movie') || g.includes('cinema') || g.includes('film')) return 'film';
+    if (g.includes('music')) return 'music';
+    if (g.includes('kid') || g.includes('child')) return 'smile';
+    if (g.includes('auto') || g.includes('motor')) return 'car';
+    if (g.includes('education') || g.includes('science') || g.includes('doc')) return 'book-open';
+    if (g.includes('comedy')) return 'laugh';
+    if (g.includes('custom')) return 'pen-tool';
+    return 'tv';
+}
+
 function setupCategories() {
-    const groups = new Set(allChannels.map(c => c.group || 'Uncategorized'));
-    const sortedGroups = Array.from(groups).sort();
+    const groups = new Set(['All', 'Favorites']);
+    allChannels.forEach(c => {
+        if (c.group) groups.add(c.group);
+    });
     
-    // "All" button is already in HTML, we just add the rest
-    sortedGroups.forEach(group => {
+    categoryFiltersEl.innerHTML = '';
+    groups.forEach(group => {
         const btn = document.createElement('button');
-        btn.className = 'filter-btn';
-        btn.textContent = group;
-        btn.dataset.group = group;
+        btn.className = `filter-btn ${group === activeGroup ? 'active' : ''}`;
+        
+        const iconName = getCategoryIcon(group);
+        btn.innerHTML = `<i data-lucide="${iconName}" style="width: 14px; height: 14px; margin-right: 6px; display: inline-block; vertical-align: text-bottom;"></i>${group}`;
+        
+        btn.onclick = () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeGroup = group;
+            filterAndRender();
+        };
         categoryFiltersEl.appendChild(btn);
     });
-
-    categoryFiltersEl.addEventListener('click', (e) => {
-        if (e.target.tagName === 'BUTTON') {
-            // Update active state
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            e.target.classList.add('active');
-            
-            activeGroup = e.target.dataset.group;
-            filterAndRender();
-        }
-    });
+    lucide.createIcons();
 }
 
 function setupSearch() {
@@ -234,13 +250,15 @@ function filterAndRender() {
 }
 
 function renderChannels(channels) {
+    channelsListEl.innerHTML = '';
+    
     if (channels.length === 0) {
         channelsListEl.innerHTML = `
-            <div class="loading-state">
-                <i data-lucide="search-x" style="width: 32px; height: 32px;"></i>
+            <div style="text-align: center; color: var(--text-muted); padding: 40px 20px;">
+                <i data-lucide="frown" style="width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
                 <p>No channels found.</p>
-            </div>
-        `;
+                <p style="font-size: 0.75rem; margin-top: 8px;">Try adjusting your search or category.</p>
+            </div>`;
         lucide.createIcons();
         return;
     }
@@ -283,7 +301,6 @@ function renderChannels(channels) {
         fragment.appendChild(card);
     }
     
-    channelsListEl.innerHTML = '';
     channelsListEl.appendChild(fragment);
     lucide.createIcons();
 }
@@ -359,7 +376,7 @@ function playChannel(channel, cardElement, autoPlay = true) {
         channel.urls.forEach((url, index) => {
             const btn = document.createElement('button');
             btn.className = 'stream-btn' + (index === 0 ? ' active' : '');
-            btn.textContent = 'Server ' + (index + 1);
+            btn.innerHTML = `<i data-lucide="server" style="width: 12px; height: 12px; margin-right: 4px; display: inline-block; vertical-align: text-bottom;"></i>Server ` + (index + 1);
             btn.onclick = () => {
                 document.querySelectorAll('.stream-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
@@ -371,6 +388,7 @@ function playChannel(channel, cardElement, autoPlay = true) {
         streamSelector.classList.add('hidden');
     }
 
+    lucide.createIcons();
     playStream(channel.urls[0], autoPlay);
 }
 

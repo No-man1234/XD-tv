@@ -330,6 +330,11 @@ function playChannel(channel, cardElement, autoPlay = true) {
     currentPlayingChannelId = channel.id;
     updateMainStarBtn();
     
+    // Scroll to top on mobile so the player is visible
+    if (window.innerWidth <= 768) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
     // Update active UI
     document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('active'));
     if (cardElement) {

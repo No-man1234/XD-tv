@@ -494,8 +494,19 @@ body {
 }
 
 @media (max-width: 768px) {
+    html, body {
+        height: auto;
+        overflow: auto;
+    }
+
+    .app-container {
+        height: auto;
+        min-height: 100vh;
+    }
+
     .main-content {
         flex-direction: column;
+        overflow: visible;
     }
     
     .player-container {
@@ -503,18 +514,20 @@ body {
         padding: 16px;
         flex: none;
         height: auto;
+        overflow-y: visible;
     }
     
     .sidebar {
         width: 100%;
-        flex: 1;
-        min-height: 0;
+        flex: none;
         height: auto;
         border-right: none;
         border-top: 1px solid var(--border-subtle);
     }
     
     .channels-list {
+        flex: none;
+        overflow-y: visible;
         -webkit-overflow-scrolling: touch;
     }
 }

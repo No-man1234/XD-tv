@@ -227,6 +227,34 @@ body {
     flex-direction: column;
     gap: 2px;
     overflow: hidden;
+    flex: 1;
+}
+
+.star-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: var(--radius-full);
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.star-btn:hover {
+    background-color: var(--bg-elevated);
+    color: var(--text-primary);
+}
+
+.star-btn.starred {
+    color: #fbbf24;
+}
+
+.star-btn.starred svg {
+    fill: #fbbf24;
 }
 
 .channel-name {

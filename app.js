@@ -3,6 +3,7 @@ const CHANNELS_URL = 'https://raw.githubusercontent.com/SHAJON-404/iptv/main/cha
 let allChannels = [];
 let currentHls = null;
 let activeGroup = 'All';
+let favorites = JSON.parse(localStorage.getItem('xdtv_favorites') || '[]');
 
 // DOM Elements
 const channelsListEl = document.getElementById('channelsList');
@@ -79,7 +80,9 @@ function filterAndRender() {
     
     let filtered = allChannels;
     
-    if (activeGroup !== 'All') {
+    if (activeGroup === 'Favorites') {
+        filtered = filtered.filter(c => favorites.includes(c.url));
+    } else if (activeGroup !== 'All') {
         filtered = filtered.filter(c => (c.group || 'Uncategorized') === activeGroup);
     }
     
@@ -119,6 +122,7 @@ function renderChannels(channels) {
         
         const fallbackLogo = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMWExYWEiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSIyIiB5PSI3IiB3aWR0aD0iMjAiIGhlaWdodD0iMTUiIHJ4PSIyIiByeT0iMiI+PC9yZWN0Pjxwb2x5bGluZSBwb2ludHM9IjE3IDIgMTIgNyA3IDIiPjwvcG9seWxpbmU+PC9zdmc+";
         
+        const isStarred = favorites.includes(channel.url);
         card.innerHTML = `
             <div class="channel-logo-container">
                 <img class="channel-logo" src="${channel.logo || fallbackLogo}" alt="${channel.name}" onerror="this.src='${fallbackLogo}'" loading="lazy">
@@ -127,13 +131,33 @@ function renderChannels(channels) {
                 <span class="channel-name">${channel.name}</span>
                 <span class="channel-group">${channel.group || 'Uncategorized'}</span>
             </div>
+            <button class="star-btn ${isStarred ? 'starred' : ''}" title="Toggle Favorite">
+                <i data-lucide="star" style="width: 16px; height: 16px;"></i>
+            </button>
         `;
+        
+        const starBtn = card.querySelector('.star-btn');
+        starBtn.onclick = (e) => {
+            e.stopPropagation();
+            toggleFavorite(channel.url);
+        };
         
         fragment.appendChild(card);
     }
     
     channelsListEl.innerHTML = '';
     channelsListEl.appendChild(fragment);
+    lucide.createIcons();
+}
+
+function toggleFavorite(url) {
+    if (favorites.includes(url)) {
+        favorites = favorites.filter(u => u !== url);
+    } else {
+        favorites.push(url);
+    }
+    localStorage.setItem('xdtv_favorites', JSON.stringify(favorites));
+    filterAndRender();
 }
 
 function playChannel(channel, cardElement) {

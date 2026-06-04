@@ -1,4 +1,6 @@
-const CHANNELS_URL = 'https://raw.githubusercontent.com/SHAJON-404/iptv/main/channels.json';
+const SHAJON_URL = 'https://raw.githubusercontent.com/SHAJON-404/iptv/main/channels.json';
+const IPTV_ORG_CHANNELS_URL = 'https://iptv-org.github.io/api/channels.json';
+const IPTV_ORG_STREAMS_URL = 'https://iptv-org.github.io/api/streams.json';
 
 let allChannels = [];
 let currentHls = null;
@@ -17,16 +19,58 @@ const currentChannelLogo = document.getElementById('currentChannelLogo');
 const currentChannelName = document.getElementById('currentChannelName');
 const currentChannelGroup = document.getElementById('currentChannelGroup');
 
+async function fetchIptvOrgData() {
+    try {
+        const [channelsRes, streamsRes] = await Promise.all([
+            fetch(IPTV_ORG_CHANNELS_URL),
+            fetch(IPTV_ORG_STREAMS_URL)
+        ]);
+        const channelsData = await channelsRes.json();
+        const streamsData = await streamsRes.json();
+        
+        const channelMap = {};
+        channelsData.forEach(c => { channelMap[c.id] = c; });
+        
+        const merged = [];
+        streamsData.forEach(stream => {
+            const channel = channelMap[stream.channel];
+            if (channel && stream.url) {
+                let group = 'Uncategorized';
+                if (channel.categories && channel.categories.length > 0) {
+                    group = channel.categories[0].charAt(0).toUpperCase() + channel.categories[0].slice(1);
+                }
+                merged.push({
+                    name: channel.name,
+                    logo: channel.logo,
+                    group: group,
+                    url: stream.url
+                });
+            }
+        });
+        return merged;
+    } catch (e) {
+        console.error('Error fetching iptv-org data:', e);
+        return [];
+    }
+}
+
 // Initialize App
 async function init() {
     try {
-        const response = await fetch(CHANNELS_URL);
-        if (!response.ok) throw new Error('Failed to fetch channels data');
+        const [shajonRes, iptvOrgData] = await Promise.all([
+            fetch(SHAJON_URL).catch(() => null),
+            fetchIptvOrgData()
+        ]);
         
-        const data = await response.json();
+        let shajonData = [];
+        if (shajonRes && shajonRes.ok) {
+            shajonData = await shajonRes.json();
+        }
+        
+        const combinedData = [...shajonData, ...iptvOrgData];
         
         const grouped = {};
-        data.forEach(c => {
+        combinedData.forEach(c => {
             if (!c.url) return;
             const key = c.name.trim().toLowerCase();
             if (!grouped[key]) {
@@ -34,7 +78,7 @@ async function init() {
                     id: key,
                     name: c.name.trim(),
                     logo: c.logo,
-                    group: c.group,
+                    group: c.group || 'Uncategorized',
                     urls: []
                 };
             }
@@ -133,8 +177,8 @@ function renderChannels(channels) {
 
     const fragment = document.createDocumentFragment();
     
-    // We limit rendering to first 150 items to keep DOM light, unless searched
-    const limit = channels.length > 200 && !searchInput.value ? 200 : channels.length;
+    // Hard limit to 200 channels to prevent browser crashing from iptv-org's massive dataset
+    const limit = Math.min(channels.length, 200);
     
     for (let i = 0; i < limit; i++) {
         const channel = channels[i];

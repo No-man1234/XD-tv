@@ -238,7 +238,11 @@ function playStream(url) {
         currentHls.attachMedia(videoPlayer);
         
         currentHls.on(Hls.Events.MANIFEST_PARSED, function () {
-            videoPlayer.play().catch(e => console.warn('Autoplay prevented', e));
+            videoPlayer.play().catch(e => {
+                console.warn('Autoplay with sound prevented by browser. Falling back to muted autoplay.', e);
+                videoPlayer.muted = true;
+                videoPlayer.play().catch(err => console.error('Autoplay totally prevented:', err));
+            });
         });
 
         currentHls.on(Hls.Events.ERROR, function (event, data) {
@@ -263,7 +267,11 @@ function playStream(url) {
         // Safari native support
         videoPlayer.src = url;
         videoPlayer.addEventListener('loadedmetadata', function () {
-            videoPlayer.play().catch(e => console.warn('Autoplay prevented', e));
+            videoPlayer.play().catch(e => {
+                console.warn('Autoplay with sound prevented by browser. Falling back to muted autoplay.', e);
+                videoPlayer.muted = true;
+                videoPlayer.play().catch(err => console.error('Autoplay totally prevented:', err));
+            });
         });
         videoPlayer.addEventListener('error', showError);
     } else {

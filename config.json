@@ -1,0 +1,6 @@
+{
+  "defaultChannel": "T Sports HD",
+  "shajonUrl": "https://raw.githubusercontent.com/SHAJON-404/iptv/refs/heads/main/app/data/channels.json",
+  "iptvOrgChannelsUrl": "https://iptv-org.github.io/api/channels.json",
+  "iptvOrgStreamsUrl": "https://iptv-org.github.io/api/streams.json"
+}

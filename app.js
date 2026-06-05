@@ -1,6 +1,9 @@
-const SHAJON_URL = 'https://raw.githubusercontent.com/SHAJON-404/iptv/refs/heads/main/app/data/channels.json';
-const IPTV_ORG_CHANNELS_URL = 'https://iptv-org.github.io/api/channels.json';
-const IPTV_ORG_STREAMS_URL = 'https://iptv-org.github.io/api/streams.json';
+let APP_CONFIG = {
+    defaultChannel: "T Sports HD",
+    shajonUrl: "https://raw.githubusercontent.com/SHAJON-404/iptv/refs/heads/main/app/data/channels.json",
+    iptvOrgChannelsUrl: "https://iptv-org.github.io/api/channels.json",
+    iptvOrgStreamsUrl: "https://iptv-org.github.io/api/streams.json"
+};
 
 let allChannels = [];
 let currentHls = null;
@@ -25,8 +28,8 @@ let currentPlayingChannelId = null;
 async function fetchIptvOrgData() {
     try {
         const [channelsRes, streamsRes] = await Promise.all([
-            fetch(IPTV_ORG_CHANNELS_URL),
-            fetch(IPTV_ORG_STREAMS_URL)
+            fetch(APP_CONFIG.iptvOrgChannelsUrl),
+            fetch(APP_CONFIG.iptvOrgStreamsUrl)
         ]);
         const channelsData = await channelsRes.json();
         const streamsData = await streamsRes.json();
@@ -60,8 +63,18 @@ async function fetchIptvOrgData() {
 // Initialize App
 async function init() {
     try {
+        // Fetch config.json first
+        try {
+            const configRes = await fetch('config.json');
+            if (configRes.ok) {
+                APP_CONFIG = await configRes.json();
+            }
+        } catch (e) {
+            console.warn('Failed to load config.json, using defaults.');
+        }
+
         const [shajonRes, iptvOrgData] = await Promise.all([
-            fetch(SHAJON_URL).catch(() => null),
+            fetch(APP_CONFIG.shajonUrl),
             fetchIptvOrgData()
         ]);
         
@@ -122,13 +135,15 @@ async function init() {
         renderChannels(allChannels);
         setupSearch();
         
-        // Autoplay T Sports HD on load
-        let defaultChannel = allChannels.find(c => c.name.toLowerCase() === 't sports hd' || c.name.toLowerCase() === 'tsports hd');
+        // Autoplay default channel on load
+        const targetName = APP_CONFIG.defaultChannel.toLowerCase();
+        let defaultChannel = allChannels.find(c => c.name.toLowerCase() === targetName);
         if (!defaultChannel) {
-            defaultChannel = allChannels.find(c => c.name.toLowerCase().includes('t sports') || c.name.toLowerCase().includes('tsports'));
+            defaultChannel = allChannels.find(c => c.name.toLowerCase().includes(targetName.split(' ')[0]));
         }
         if (defaultChannel) {
-            playChannel(defaultChannel, null, false);
+            // true means autoplay will attempt, and fallback to mute if blocked
+            playChannel(defaultChannel, null, true);
         }
     } catch (error) {
         console.error('Initialization error:', error);
@@ -229,7 +244,7 @@ function setupSearch() {
 }
 
 function filterAndRender() {
-    const query = searchInput.value.toLowerCase().trim();
+    const q = searchInput.value.toLowerCase().trim();
     
     let filtered = allChannels;
     
@@ -239,11 +254,29 @@ function filterAndRender() {
         filtered = filtered.filter(c => (c.group || 'Uncategorized') === activeGroup);
     }
     
-    if (query) {
+    if (q) {
         filtered = filtered.filter(c => 
-            c.name.toLowerCase().includes(query) || 
-            (c.group && c.group.toLowerCase().includes(query))
+            c.name.toLowerCase().includes(q) || 
+            (c.group && c.group.toLowerCase().includes(q))
         );
+        
+        // Custom search sorting: Exact Match > Starts With > Substring
+        filtered.sort((a, b) => {
+            const nameA = a.name.toLowerCase();
+            const nameB = b.name.toLowerCase();
+            
+            const aExact = nameA === q;
+            const bExact = nameB === q;
+            if (aExact && !bExact) return -1;
+            if (!aExact && bExact) return 1;
+            
+            const aStarts = nameA.startsWith(q);
+            const bStarts = nameB.startsWith(q);
+            if (aStarts && !bStarts) return -1;
+            if (!aStarts && bStarts) return 1;
+            
+            return 0; // maintain original sorting for ties
+        });
     }
     
     renderChannels(filtered);

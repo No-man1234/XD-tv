@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XD-TV | Admin Panel</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='20' height='14' x='2' y='3' rx='2'/%3E%3Cpath d='M8 21h8'/%3E%3Cpath d='M12 17v4'/%3E%3Cpath d='m10 10 5 3-5 3v-6z'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .admin-container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-subtle);
+        }
+        .admin-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        .form-group input {
+            width: 100%;
+            background-color: var(--bg-base);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .btn-primary {
+            width: 100%;
+            background-color: var(--accent);
+            color: var(--accent-fg);
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity var(--transition-fast);
+        }
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+        .btn-secondary {
+            width: 100%;
+            background-color: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        #configForm {
+            display: none;
+        }
+        .alert {
+            padding: 12px;
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+            display: none;
+        }
+        .alert.success {
+            background-color: rgba(34, 197, 94, 0.1);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            display: block;
+        }
+        .alert.error {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container" style="overflow-y: auto;">
+        <div class="admin-container">
+            <div class="admin-header">
+                <i data-lucide="settings" style="width: 28px; height: 28px; color: var(--accent);"></i>
+                <h1 style="margin: 0; font-size: 1.5rem;">XD-TV Admin</h1>
+            </div>
+
+            <div id="alertBox" class="alert"></div>
+
+            <div id="authSection">
+                <p style="color: var(--text-muted); margin-bottom: 20px;">
+                    Log in with your GitHub Personal Access Token to edit the live configuration.
+                </p>
+                <div class="form-group">
+                    <label>GitHub PAT</label>
+                    <input type="password" id="patInput" placeholder="ghp_xxxxxxxxxxxxxx">
+                </div>
+                <button class="btn-primary" id="loginBtn">Authenticate</button>
+            </div>
+
+            <div id="configForm">
+                <p style="color: var(--text-muted); margin-bottom: 20px;">
+                    Changes saved here will automatically redeploy the site on Vercel.
+                </p>
+                <div class="form-group">
+                    <label>Default Channel</label>
+                    <input type="text" id="cfgDefaultChannel">
+                </div>
+                <div class="form-group">
+                    <label>SHAJON JSON Pool URL</label>
+                    <input type="text" id="cfgShajonUrl">
+                </div>
+                <div class="form-group">
+                    <label>IPTV-Org Channels URL</label>
+                    <input type="text" id="cfgIptvChannelsUrl">
+                </div>
+                <div class="form-group">
+                    <label>IPTV-Org Streams URL</label>
+                    <input type="text" id="cfgIptvStreamsUrl">
+                </div>
+                
+                <button class="btn-primary" id="saveBtn" style="margin-top: 10px;">
+                    <i data-lucide="save" style="width: 18px; height: 18px; display: inline-block; vertical-align: text-bottom; margin-right: 8px;"></i>
+                    Save & Deploy
+                </button>
+                <button class="btn-secondary" onclick="window.location.href='/'">Return to App</button>
+            </div>
+        </div>
+    </div>
+    <script src="admin.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

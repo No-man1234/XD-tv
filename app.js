@@ -236,6 +236,7 @@ function setupSearch() {
                 
                 // Add to current session and play
                 allChannels.unshift(customChannel);
+                videoPlayer.muted = false; // Reset mute on explicit user interaction
                 playChannel(customChannel, null, true);
                 filterAndRender();
             }
@@ -307,7 +308,10 @@ function renderChannels(channels) {
         const card = document.createElement('div');
         card.className = `channel-card ${channel.id === currentPlayingChannelId ? 'active' : ''}`;
         card.dataset.id = channel.id;
-        card.onclick = () => playChannel(channel, card);
+        card.onclick = () => {
+            videoPlayer.muted = false; // Reset mute on explicit user interaction
+            playChannel(channel, card);
+        };
         
         const fallbackLogo = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhMWExYWEiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSIyIiB5PSI3IiB3aWR0aD0iMjAiIGhlaWdodD0iMTUiIHJ4PSIyIiByeT0iMiI+PC9yZWN0Pjxwb2x5bGluZSBwb2ludHM9IjE3IDIgMTIgNyA3IDIiPjwvcG9seWxpbmU+PC9zdmc+";
         
@@ -413,6 +417,7 @@ function playChannel(channel, cardElement, autoPlay = true) {
             btn.onclick = () => {
                 document.querySelectorAll('.stream-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
+                videoPlayer.muted = false; // Reset mute on explicit user interaction
                 playStream(url, autoPlay);
             };
             streamSelector.appendChild(btn);

@@ -1,4 +1,4 @@
-const SHAJON_URL = 'https://raw.githubusercontent.com/SHAJON-404/iptv/main/channels.json';
+const SHAJON_URL = 'https://raw.githubusercontent.com/SHAJON-404/iptv/refs/heads/main/app/data/channels.json';
 const IPTV_ORG_CHANNELS_URL = 'https://iptv-org.github.io/api/channels.json';
 const IPTV_ORG_STREAMS_URL = 'https://iptv-org.github.io/api/streams.json';
 

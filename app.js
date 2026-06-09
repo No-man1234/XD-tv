@@ -74,7 +74,7 @@ async function init() {
         }
 
         const [shajonRes, iptvOrgData] = await Promise.all([
-            fetch(APP_CONFIG.shajonUrl),
+            fetch(APP_CONFIG.shajonUrl).catch(() => ({ ok: false })),
             fetchIptvOrgData()
         ]);
         

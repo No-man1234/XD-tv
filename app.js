@@ -86,15 +86,27 @@ async function init() {
             console.warn('Failed to load config.json, using defaults.');
         }
 
-        const [shajonRes, iptvOrgData] = await Promise.all([
-            fetchWithTimeout(APP_CONFIG.shajonUrl).catch(() => ({ ok: false })),
+        const baseUrl = APP_CONFIG.shajonUrl.substring(0, APP_CONFIG.shajonUrl.lastIndexOf('/'));
+        const shajonUrls = [
+            APP_CONFIG.shajonUrl,
+            `${baseUrl}/sports.json`,
+            `${baseUrl}/bangla.json`,
+            `${baseUrl}/fifa.json`
+        ];
+        
+        const shajonPromises = shajonUrls.map(url => 
+            fetchWithTimeout(url)
+                .then(r => r.ok ? r.json() : [])
+                .catch(() => [])
+        );
+
+        const results = await Promise.all([
+            ...shajonPromises,
             fetchIptvOrgData()
         ]);
         
-        let shajonData = [];
-        if (shajonRes && shajonRes.ok) {
-            shajonData = await shajonRes.json();
-        }
+        const iptvOrgData = results.pop();
+        const shajonData = results.flat();
         
         const combinedData = [...shajonData, ...iptvOrgData];
         

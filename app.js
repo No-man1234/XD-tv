@@ -25,11 +25,24 @@ const mainStarBtn = document.getElementById('mainStarBtn');
 
 let currentPlayingChannelId = null;
 
+async function fetchWithTimeout(url, timeoutMs = 15000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        const res = await fetch(url, { signal: controller.signal });
+        clearTimeout(timer);
+        return res;
+    } catch (e) {
+        clearTimeout(timer);
+        throw e;
+    }
+}
+
 async function fetchIptvOrgData() {
     try {
         const [channelsRes, streamsRes] = await Promise.all([
-            fetch(APP_CONFIG.iptvOrgChannelsUrl),
-            fetch(APP_CONFIG.iptvOrgStreamsUrl)
+            fetchWithTimeout(APP_CONFIG.iptvOrgChannelsUrl),
+            fetchWithTimeout(APP_CONFIG.iptvOrgStreamsUrl)
         ]);
         const channelsData = await channelsRes.json();
         const streamsData = await streamsRes.json();
@@ -74,7 +87,7 @@ async function init() {
         }
 
         const [shajonRes, iptvOrgData] = await Promise.all([
-            fetch(APP_CONFIG.shajonUrl).catch(() => ({ ok: false })),
+            fetchWithTimeout(APP_CONFIG.shajonUrl).catch(() => ({ ok: false })),
             fetchIptvOrgData()
         ]);
         

@@ -134,20 +134,24 @@ async function init() {
             const aGroup = (a.group || '').toLowerCase();
             const bGroup = (b.group || '').toLowerCase();
             
+            const aIsFifa = aGroup.includes('fifa');
+            const bIsFifa = bGroup.includes('fifa');
+
             const aIsBD = aGroup.includes('bangla') || aGroup.includes('bangladeshi');
             const bIsBD = bGroup.includes('bangla') || bGroup.includes('bangladeshi');
             
             const aIsSports = aGroup.includes('sports');
             const bIsSports = bGroup.includes('sports');
             
-            const getRank = (isBD, isSports) => {
+            const getRank = (isFifa, isBD, isSports) => {
+                if (isFifa) return 0;
                 if (isBD) return 1;
                 if (isSports) return 2;
                 return 3;
             };
             
-            const aRank = getRank(aIsBD, aIsSports);
-            const bRank = getRank(bIsBD, bIsSports);
+            const aRank = getRank(aIsFifa, aIsBD, aIsSports);
+            const bRank = getRank(bIsFifa, bIsBD, bIsSports);
             
             if (aRank !== bRank) {
                 return aRank - bRank;
